@@ -1,7 +1,8 @@
 #include <SDL.h>
 #include <lz4.h>
+#include <lz4hc.h>
 
-int IMG_SaveLZ4_RW (SDL_Surface* surface, SDL_RWops* dst, int freedst)
+int IMG_SaveLZ4_RW (SDL_Surface* surface, SDL_RWops* dst, int freedst, int hc)
 {
   Uint16 width = (Uint16)(surface->w);
   Uint16 height = (Uint16)(surface->h);
@@ -16,8 +17,16 @@ int IMG_SaveLZ4_RW (SDL_Surface* surface, SDL_RWops* dst, int freedst)
   const char* uncompressed_buffer = (const char*)(surface->pixels);
   int max_lz4_size = LZ4_compressBound (uncompressed_size);
   char* compressed_buffer = malloc (max_lz4_size);
-  int true_size = LZ4_compress_default (uncompressed_buffer, compressed_buffer,
-                                        uncompressed_size, max_lz4_size);
+  int true_size = -1;
+
+  if (hc)
+    true_size = LZ4_compress_HC(uncompressed_buffer, compressed_buffer,
+                                uncompressed_size, max_lz4_size,
+                                LZ4HC_CLEVEL_MAX);
+  else
+    true_size = LZ4_compress_default (uncompressed_buffer, compressed_buffer,
+                                      uncompressed_size, max_lz4_size);
+
   SDL_RWwrite (dst, &true_size, sizeof(int), 1);
   SDL_RWwrite (dst, compressed_buffer, 1, true_size);
 
@@ -29,10 +38,10 @@ int IMG_SaveLZ4_RW (SDL_Surface* surface, SDL_RWops* dst, int freedst)
   return 0;
 }
 
-int IMG_SaveLZ4 (SDL_Surface* surface, const char* file)
+int IMG_SaveLZ4 (SDL_Surface* surface, const char* file, int hc)
 {
   SDL_RWops* dst = SDL_RWFromFile (file, "wb");
-  return (dst ? IMG_SaveLZ4_RW (surface, dst, 1) : -1);
+  return (dst ? IMG_SaveLZ4_RW (surface, dst, 1, hc) : -1);
 }
 
 SDL_Surface* IMG_LoadLZ4_RW (SDL_RWops* src, int freesrc)

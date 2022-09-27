@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.2)
-project (sosage)
+project (SDL_lz4_image)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
@@ -36,3 +36,9 @@ include_directories(${LZ4_INCLUDE_DIR})
 
 add_executable(SDL_lz4_image_converter "SDL_lz4_image_converter.c" ${SDL_LZ4_IMAGE_SRC})
 target_link_libraries(SDL_lz4_image_converter "${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARIES} ${LZ4_LIBRARY}")
+
+add_executable(profile "profile.c" ${SDL_LZ4_IMAGE_SRC})
+target_link_libraries(profile "${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARIES} ${LZ4_LIBRARY}")
+
+add_executable(convert "convert.c" ${SDL_LZ4_IMAGE_SRC})
+target_link_libraries(convert "${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARIES} ${LZ4_LIBRARY}")
